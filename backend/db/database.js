@@ -54,5 +54,6 @@ db.exec(`
 try { db.exec(`ALTER TABLE ideas ADD COLUMN target_users TEXT`); } catch (e) { /* column already exists */ }
 try { db.exec(`ALTER TABLE ideas ADD COLUMN user_elaboration TEXT`); } catch (e) { /* column already exists */ }
 try { db.exec(`ALTER TABLE ideas ADD COLUMN strategic_direction TEXT`); } catch (e) { /* column already exists */ }
+try { db.exec(`ALTER TABLE analysis_results ADD COLUMN adversarial TEXT`); } catch (e) { /* column already exists */ }
 
 module.exports = db;

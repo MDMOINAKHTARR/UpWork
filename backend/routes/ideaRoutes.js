@@ -171,18 +171,27 @@ router.post('/analyze-idea', authMiddleware, async (req, res) => {
         const monetizationData = JSON.stringify(blueprint.monetization);
         const roadmapData = JSON.stringify(blueprint.roadmap);
 
+        // Agentic V2 Adversarial data
+        const adversarialData = JSON.stringify({
+             theReaper: blueprint.theReaper,
+             thePainMiner: blueprint.thePainMiner,
+             pricingArchitect: blueprint.pricingArchitect,
+             thePivotMaster: blueprint.thePivotMaster,
+             researchSources: blueprint.researchSources
+        });
+
         if (existing) {
             db.prepare(`
-        UPDATE analysis_results SET market=?, competitors=?, feasibility=?, tech_stack=?, monetization=?, roadmap=? WHERE idea_id=?
+        UPDATE analysis_results SET market=?, competitors=?, feasibility=?, tech_stack=?, monetization=?, roadmap=?, adversarial=? WHERE idea_id=?
       `).run(
-                marketData, competitorsData, feasibilityData, techStackData, monetizationData, roadmapData, ideaSessionId
+                marketData, competitorsData, feasibilityData, techStackData, monetizationData, roadmapData, adversarialData, ideaSessionId
             );
         } else {
             db.prepare(`
-        INSERT INTO analysis_results (idea_id, market, competitors, feasibility, tech_stack, monetization, roadmap)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO analysis_results (idea_id, market, competitors, feasibility, tech_stack, monetization, roadmap, adversarial)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-                ideaSessionId, marketData, competitorsData, feasibilityData, techStackData, monetizationData, roadmapData
+                ideaSessionId, marketData, competitorsData, feasibilityData, techStackData, monetizationData, roadmapData, adversarialData
             );
         }
 
@@ -257,6 +266,7 @@ router.get('/ideas/:id', authMiddleware, (req, res) => {
                 tech_stack: JSON.parse(analysis.tech_stack || 'null'),
                 monetization: JSON.parse(analysis.monetization || 'null'),
                 roadmap: JSON.parse(analysis.roadmap || 'null'),
+                adversarial: JSON.parse(analysis.adversarial || 'null'),
             } : null,
         });
     } catch (err) {

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api';
-import { Printer, Trash2 } from 'lucide-react';
+import { Printer, Trash2, ExternalLink } from 'lucide-react';
 
 export default function SavedIdeaPage() {
     const { user } = useAuth();
@@ -53,26 +53,22 @@ export default function SavedIdeaPage() {
     const selectedIdea = idea.selected_idea;
     const bp = analysis ? {
         ...analysis,
-        competitors: analysis.competitors,
-        techStack: analysis.tech_stack,
-        monetization: analysis.monetization,
-        roadmap: analysis.roadmap,
+        adversarial: analysis.adversarial,
     } : null;
 
-    const feasScore = bp?.scores?.compositeScore ?? bp?.feasibilityScore ?? 0;
+    const feasScore = bp?.scores?.compositeScore ?? bp?.feasibilityScore ?? (bp?.scores?.technicalFeasibility ? Math.round((bp.scores.technicalFeasibility + bp.scores.marketReadiness + bp.scores.regulatoryRisk + bp.scores.competitiveAdvantage + bp.scores.executionComplexity) / 5) : 0);
     const feasColor = feasScore >= 70 ? 'var(--color-emerald)' : feasScore >= 50 ? 'var(--color-primary)' : 'var(--color-rose)';
-    const renderBullets = (text: string) => text?.split('\n').map((line: string, i: number) => (
-        <p key={i} style={{ fontSize: '0.92rem', fontWeight: line.startsWith('•') ? 600 : 700, color: 'var(--color-text-1)', lineHeight: 1.7, marginBottom: '4px' }}>{line}</p>
-    ));
+
+    const adv = bp?.adversarial || {};
 
     return (
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px 80px' }}>
             {/* Header */}
             <div className="animate-jitter-in" style={{ marginBottom: '32px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <p style={{ fontSize: '0.85rem', fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px', borderBottom: 'var(--border-width) solid var(--color-border)', display: 'inline-block' }}>
-                            Saved Blueprint · {new Date(idea.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            Agentic V2 Blueprint · {new Date(idea.created_at).toLocaleDateString()}
                         </p>
                         <h1 className="hover-glitch" style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '12px', color: 'var(--color-text-1)', textTransform: 'uppercase', textShadow: '4px 4px 0px 0px #000000', WebkitTextStroke: '2px black', WebkitTextFillColor: 'white' }}>
                             {bp?.startupName || selectedIdea?.title || 'Untitled'}
@@ -82,7 +78,6 @@ export default function SavedIdeaPage() {
                         </p>
                     </div>
 
-                    {/* Actions */}
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         <button onClick={() => window.print()} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', fontSize: '0.9rem' }}>
                             <Printer size={16} strokeWidth={2.5} /> Print PDF
@@ -93,11 +88,11 @@ export default function SavedIdeaPage() {
                     </div>
                 </div>
             </div>
+
             {/* Badges */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '32px' }}>
                 <span className="badge badge-emerald" style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)', padding: '8px 14px', fontSize: '0.9rem' }}>📂 {idea.domain}</span>
-                {feasScore > 0 && <span className="badge badge-blue" style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)', padding: '8px 14px', fontSize: '0.9rem' }}>Feasibility: {feasScore}/100 {bp?.scores?.grade ? `(${bp.scores.grade})` : ''}</span>}
-                {bp?.edgeTool && <span className="badge badge-purple" style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)', padding: '8px 14px', fontSize: '0.9rem' }}>⭐ {bp.edgeTool.split(' ')[0]}</span>}
+                {feasScore > 0 && <span className="badge badge-blue" style={{ boxShadow: '3px 3px 0px 0px var(--shadow-color)', padding: '8px 14px', fontSize: '0.9rem' }}>Score: {feasScore}/100</span>}
             </div>
 
             {!bp ? (
@@ -105,263 +100,156 @@ export default function SavedIdeaPage() {
                     <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>No analysis found for this idea.</p>
                 </div>
             ) : (
-                <>
-                    {/* Investor Pitch */}
-                    {bp.summary && (
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-100" style={{ marginBottom: '24px', borderLeft: '8px solid var(--color-primary)', padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>🎯</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Investor Pitch</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>30-second elevator pitch</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '24px' }}>
-                                <p style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: '1.8', fontStyle: 'italic', borderLeft: '4px solid var(--color-border)', paddingLeft: '20px' }}>"{bp.summary}"</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Core Thesis */}
-                    {(bp.pain || bp.antidote) && (
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-200" style={{ marginBottom: '24px', padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>⚙️</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Core Thesis & Stack</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>Underlying logic and technology</p>
-                                </div>
-                            </div>
-                            <div style={{ padding: '24px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                                    <div style={{ padding: '16px', background: 'var(--color-bg)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
-                                        <p style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>Logic / Pivot</p>
-                                        <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{bp.coreLogic}</p>
-                                    </div>
-                                    <div style={{ padding: '16px', background: 'var(--color-bg)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
-                                        <p style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>Key Tech Stack</p>
-                                        <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{bp.techStack}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
+                    
+                    {/* Left Column: Adversarial Personas */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        
+                        {/* Summary */}
+                        {bp.summary && (
+                            <div className="section-card hover-pop-card animate-brutal-bounce delay-100" style={{ borderLeft: '8px solid var(--color-primary)', padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)', background: 'var(--color-bg)' }}>
+                                <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
+                                    <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>🎯</div>
+                                    <div>
+                                        <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Elevator Pitch</h2>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Main grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '20px' }}>
-
-                        {/* Market Gap */}
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-300" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>📊</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Market Gap — First Principles</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>Why hasn't this been solved?</p>
+                                <div style={{ padding: '24px' }}>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: '1.8', fontStyle: 'italic', borderLeft: '4px solid var(--color-border)', paddingLeft: '20px' }}>"{bp.summary}"</p>
                                 </div>
                             </div>
-                            <div style={{ padding: '24px' }}>
-                                {renderBullets(bp.marketGap || bp.market?.marketGap || '')}
-                            </div>
-                        </div>
+                        )}
 
-                        {/* Feasibility — Dynamic Score Breakdown */}
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-400" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>⚡</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Feasibility Score</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>Composite from 5 weighted sub-scores</p>
+                        {/* THE REAPER (Red) */}
+                        {adv.theReaper && Array.isArray(adv.theReaper) && (
+                            <div className="section-card hover-pop-card animate-brutal-bounce delay-200" style={{ border: '4px solid #ef4444', padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px #ef4444' }}>
+                                <div className="section-card-header" style={{ padding: '20px 24px', background: '#ef4444', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
+                                    <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px #000', width: '48px', height: '48px', fontSize: '1.4rem', background: '#000', color: '#fff' }}>💀</div>
+                                    <div>
+                                        <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: '#000', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>The Reaper</h2>
+                                        <p style={{ fontSize: '0.9rem', color: '#000', fontWeight: 800 }}>Why this will fail</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{ padding: '24px' }}>
-
-                                {/* Composite + Grade */}
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                                    <div style={{ background: 'var(--color-surface)', border: 'var(--border-width) solid var(--color-border)', borderRadius: '50%', padding: '28px', boxShadow: '4px 4px 0px 0px var(--shadow-color)', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 900, color: feasColor, WebkitTextStroke: '2px black' } as any}>{feasScore}</div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 900 }}>/100</div>
-                                    </div>
-                                    {bp.scores?.grade && (
-                                        <div style={{ padding: '10px 16px', background: feasColor, border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', boxShadow: '4px 4px 0px 0px var(--shadow-color)', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '1.8rem', fontWeight: 900 }}>{bp.scores.grade}</div>
-                                            <div style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>Grade</div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Sub-Score Bars */}
-                                {bp.scores && (() => {
-                                    const SCORE_LABELS: Record<string, { label: string; icon: string }> = {
-                                        technicalFeasibility: { label: 'Technical Feasibility', icon: '🛠️' },
-                                        marketReadiness: { label: 'Market Readiness', icon: '📈' },
-                                        regulatoryRisk: { label: 'Regulatory Risk (inv.)', icon: '📋' },
-                                        competitiveAdvantage: { label: 'Competitive Advantage', icon: '🔒' },
-                                        executionComplexity: { label: 'Execution Complexity (inv.)', icon: '⚙️' },
-                                    };
-                                    return (
-                                        <div style={{ display: 'grid', gap: '10px', marginBottom: '14px' }}>
-                                            {Object.keys(SCORE_LABELS).map(key => {
-                                                const raw = (bp.scores as any)?.[key] ?? 0;
-                                                const info = SCORE_LABELS[key];
-                                                const barColor = raw >= 70 ? 'var(--color-emerald)' : raw >= 50 ? 'var(--color-primary)' : 'var(--color-rose)';
-                                                const weight = bp.scores?.breakdown?.[key]?.weight;
-                                                return (
-                                                    <div key={key}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>{info.icon} {info.label}</span>
-                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900 }}>{raw}/100 {weight ? `(×${(weight * 100).toFixed(0)}%)` : ''}</span>
-                                                        </div>
-                                                        <div style={{ height: '10px', background: 'var(--color-bg)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)', overflow: 'hidden' }}>
-                                                            <div style={{ height: '100%', width: `${raw}%`, background: barColor, transition: 'width 0.5s ease' }} />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })()}
-
-                                {/* Score Rationale */}
-                                {bp.scores?.scoreRationale && (
-                                    <div style={{ background: 'var(--color-bg)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)', padding: '10px 14px', marginBottom: '12px' }}>
-                                        <p style={{ fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>🧠 Score Rationale</p>
-                                        <p style={{ fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.6 }}>{bp.scores.scoreRationale}</p>
-                                    </div>
-                                )}
-
-                                {bp.realityCheck && (
-                                    <div style={{ background: 'var(--color-surface)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)', padding: '12px 16px' }}>
-                                        <p style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>⚠ Reality Check</p>
-                                        <p style={{ fontSize: '0.88rem', fontWeight: 600, lineHeight: 1.5 }}>{bp.realityCheck}</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Competitors */}
-                            {bp.competitors && Array.isArray(bp.competitors) && (
-                                <div className="section-card hover-pop-card animate-brutal-bounce delay-500" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)' }}>
-                                    <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                        <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>🏆</div>
-                                        <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Competitor Intelligence Matrix</h2>
-                                    </div>
-                                    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        {bp.competitors.map((c: any, i: number) => (
-                                            <div key={i} style={{ padding: '16px', background: 'var(--color-surface)', borderRadius: 'var(--border-radius)', border: 'var(--border-width) solid var(--color-border)', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
-                                                <h3 style={{ fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', marginBottom: '10px' }}>{c.name}</h3>
-                                                <div style={{ padding: '8px 12px', marginBottom: '8px', background: 'var(--color-bg)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)' }}>
-                                                    <p style={{ fontSize: '0.78rem', fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase' }}>🛡 {c.moat ? 'Their Moat' : 'Strength'}</p>
-                                                    <p style={{ fontSize: '0.87rem', fontWeight: 600 }}>{c.moat || c.weakness}</p>
-                                                </div>
-                                                <div style={{ padding: '8px 12px', background: 'var(--color-rose)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)' }}>
-                                                    <p style={{ fontSize: '0.78rem', fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase' }}>⚔ {c.breach ? 'The Breach' : 'Opportunity'}</p>
-                                                    <p style={{ fontSize: '0.87rem', fontWeight: 600 }}>{c.breach || c.differentiation}</p>
-                                                </div>
-                                            </div>
+                                <div style={{ padding: '24px', background: 'var(--color-surface)' }}>
+                                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {adv.theReaper.map((r: any, i: number) => (
+                                            <li key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                                <span style={{ color: '#ef4444', fontSize: '1.2rem', fontWeight: 900, marginTop: '-2px' }}>✖</span>
+                                                <p style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1.6 }}>{r.point || r.reason || r}</p>
+                                            </li>
                                         ))}
-                                    </div>
-                                </div>
-                            )}
-
-                        </div>{/* End Main grid */}
-
-                        {/* Tech Stack + Edge Tool + Data Strategy */}
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-600" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)', marginTop: '24px' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>🛠️</div>
-                                <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Technical Schematic</h2>
-                            </div>
-                            <div style={{ padding: '24px' }}>
-                                <p style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Stack</p>
-                                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
-                                    {(bp.techStack || bp.tech_stack || []).map((t: string, i: number) => (
-                                        <li key={i} style={{ padding: '10px 14px', background: 'var(--color-surface)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', fontSize: '0.88rem', fontWeight: 700, boxShadow: '2px 2px 0px 0px var(--shadow-color)' }}>{t}</li>
-                                    ))}
-                                </ul>
-                                {bp.edgeTool && (
-                                    <div style={{ padding: '12px 16px', background: 'var(--color-primary)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', marginBottom: '10px' }}>
-                                        <p style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>⭐ Edge Tool</p>
-                                        <p style={{ fontSize: '0.9rem', fontWeight: 700 }}>{bp.edgeTool}</p>
-                                    </div>
-                                )}
-                                {bp.dataStrategy && (
-                                    <div style={{ padding: '12px 16px', background: 'var(--color-surface)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)' }}>
-                                        <p style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>🗄 Data Moat</p>
-                                        <p style={{ fontSize: '0.88rem', fontWeight: 600, lineHeight: 1.6 }}>{bp.dataStrategy}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Monetization */}
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-700" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)', marginTop: '24px' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>💰</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Revenue Architecture</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>LTV-aware multi-stream model</p>
+                                    </ul>
                                 </div>
                             </div>
-                            <div style={{ padding: '24px' }}>
-                                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    {(bp.monetization || []).map((m: string, i: number) => (
-                                        <li key={i} style={{ padding: '12px 16px', background: i === 0 ? 'var(--color-primary)' : 'var(--color-surface)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.6, boxShadow: '2px 2px 0px 0px var(--shadow-color)' }}>
-                                            💵 {m}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+                        )}
 
-                        {/* 12-Week Roadmap */}
-                        <div className="section-card hover-pop-card animate-brutal-bounce delay-100" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--shadow-color)', marginTop: '24px' }}>
-                            <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
-                                <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px var(--shadow-color)', width: '48px', height: '48px', fontSize: '1.4rem' }}>🗺️</div>
-                                <div>
-                                    <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--color-text-1)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>12-Week Execution Sprint</h2>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-3)', fontWeight: 700 }}>Foundation → Alpha → Feedback Loop</p>
+                        {/* THE PAIN MINER (Orange) */}
+                        {adv.thePainMiner && Array.isArray(adv.thePainMiner) && (
+                            <div className="section-card hover-pop-card animate-brutal-bounce delay-300" style={{ border: '4px solid #f97316', padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px #f97316' }}>
+                                <div className="section-card-header" style={{ padding: '20px 24px', background: '#fdba74', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
+                                    <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px #000', width: '48px', height: '48px', fontSize: '1.4rem', background: '#fff', color: '#000' }}>⛏️</div>
+                                    <div>
+                                        <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: '#000', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>The Pain Miner</h2>
+                                        <p style={{ fontSize: '0.9rem', color: '#000', fontWeight: 800 }}>Real customer frustrations</p>
+                                    </div>
+                                </div>
+                                <div style={{ padding: '24px', background: 'var(--color-surface)' }}>
+                                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {adv.thePainMiner.map((p: any, i: number) => (
+                                            <li key={i} style={{ padding: '12px 16px', background: 'var(--color-bg)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)', boxShadow: '2px 2px 0px 0px var(--shadow-color)' }}>
+                                                <p style={{ fontSize: '0.95rem', fontWeight: 700, lineHeight: 1.5 }}>"{p.frustration || p.pain || p}"</p>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
-                            <div style={{ padding: '24px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                                    {(bp.roadmap || []).map((phase: any, i: number) => {
-                                        const colors = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-emerald)'];
-                                        const tasks = Array.isArray(phase.tasks) ? phase.tasks : [phase.task].filter(Boolean);
-                                        return (
-                                            <div key={i} style={{ border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', overflow: 'hidden', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
-                                                <div style={{ background: colors[i] || 'var(--color-primary)', padding: '16px', borderBottom: 'var(--border-width) solid var(--color-border)' }}>
-                                                    <p style={{ fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Weeks {phase.week}</p>
-                                                    <p style={{ fontSize: '1.05rem', fontWeight: 900, marginTop: '4px' }}>{phase.goal || phase.milestone}</p>
-                                                    {phase.killerFeature && (
-                                                        <p style={{ fontSize: '0.8rem', fontWeight: 700, marginTop: '8px', background: 'rgba(0,0,0,0.1)', padding: '6px 10px', borderRadius: '4px' }}>
-                                                            ⚡ Killer Feature: {phase.killerFeature}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div style={{ padding: '16px', background: 'var(--color-surface)' }}>
-                                                    {phase.kpis && phase.kpis.length > 0 && (
-                                                        <div style={{ marginBottom: '12px' }}>
-                                                            <p style={{ fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>📈 Seed KPIs</p>
-                                                            {phase.kpis.map((kpi: string, k: number) => (
-                                                                <p key={k} style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-emerald)', marginBottom: '4px' }}>✓ {kpi}</p>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                        )}
+
+                        {/* THE PRICING ARCHITECT (3-Column) */}
+                        {adv.pricingArchitect && (
+                            <div className="section-card hover-pop-card animate-brutal-bounce delay-400" style={{ padding: 0, overflow: 'hidden', boxShadow: '8px 8px 0px 0px var(--color-emerald)', border: '4px solid var(--color-emerald)' }}>
+                                <div className="section-card-header" style={{ padding: '20px 24px', background: 'var(--color-emerald)', borderBottom: 'var(--border-width) solid var(--color-border)', marginBottom: '0' }}>
+                                    <div className="section-icon" style={{ boxShadow: '4px 4px 0px 0px #000', width: '48px', height: '48px', fontSize: '1.4rem' }}>💰</div>
+                                    <div>
+                                        <h2 style={{ fontWeight: 900, fontSize: '1.2rem', color: '#000', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>The Pricing Architect</h2>
+                                    </div>
+                                </div>
+                                <div style={{ padding: '24px', background: 'var(--color-surface)' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                                        {['starter', 'pro', 'enterprise'].map((tier, idx) => {
+                                            const tierData = adv.pricingArchitect[tier];
+                                            if (!tierData) return null;
+                                            return (
+                                                <div key={tier} style={{ padding: '16px', background: idx === 1 ? 'var(--color-primary)' : 'var(--color-bg)', border: 'var(--border-width) solid var(--color-border)', borderRadius: 'var(--border-radius)', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
+                                                    <h3 style={{ textTransform: 'uppercase', fontWeight: 900, fontSize: '1.1rem', marginBottom: '8px', paddingBottom: '8px', borderBottom: '2px solid var(--color-border)' }}>{tier}</h3>
+                                                    <p style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '16px' }}>{tierData.price}</p>
                                                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                        {tasks.map((task: string, j: number) => (
-                                                            <li key={j} style={{ display: 'flex', gap: '8px', fontSize: '0.88rem', fontWeight: 600, lineHeight: 1.5 }}>
-                                                                <span style={{ flexShrink: 0, fontWeight: 900 }}>→</span>{task}
-                                                            </li>
+                                                        {(tierData.features || []).map((f: string, i: number) => (
+                                                            <li key={i} style={{ fontSize: '0.85rem', fontWeight: 700, borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '4px' }}>✓ {f}</li>
                                                         ))}
                                                     </ul>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
+
+                        {/* THE PIVOT MASTER (High Contrast Blue) */}
+                        {adv.thePivotMaster && (
+                            <div className="section-card hover-pop-card animate-brutal-bounce delay-500" style={{ border: '4px solid #1e3a8a', background: '#2563eb', padding: '32px', boxShadow: '8px 8px 0px 0px #000', color: '#fff' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                                    <div style={{ fontSize: '2rem' }}>🚀</div>
+                                    <h2 style={{ fontWeight: 900, fontSize: '1.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>The Pivot Master</h2>
+                                </div>
+                                <div style={{ background: '#1e3a8a', padding: '20px', borderRadius: 'var(--border-radius)', border: '2px solid #000' }}>
+                                    <p style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: '#93c5fd', marginBottom: '8px' }}>The Winning Edge</p>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1.6, color: '#fff' }}>{adv.thePivotMaster.winningEdge}</p>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
-                </>
+
+                    {/* Right Column: Sidebar (Research Sources) */}
+                    <div style={{ position: 'sticky', top: '24px' }}>
+                        <div className="section-card" style={{ padding: 0, overflow: 'hidden', boxShadow: '6px 6px 0px 0px var(--shadow-color)', border: '4px solid var(--color-border)' }}>
+                            <div style={{ padding: '16px 20px', background: 'var(--color-bg)', borderBottom: 'var(--border-width) solid var(--color-border)' }}>
+                                <h3 style={{ fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>🌐</span> Research Sources
+                                </h3>
+                            </div>
+                            <div style={{ padding: '20px', background: 'var(--color-surface)' }}>
+                                {(adv.researchSources && adv.researchSources.length > 0) ? (
+                                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                        {adv.researchSources.map((source: any, i: number) => (
+                                            <li key={i}>
+                                                <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', padding: '12px', background: 'var(--color-bg)', border: '2px solid var(--color-border)', borderRadius: 'var(--border-radius)', textDecoration: 'none', color: 'var(--color-text-1)', boxShadow: '2px 2px 0px 0px var(--shadow-color)', transition: 'transform 0.1s' }} onMouseOver={e => e.currentTarget.style.transform = 'translate(-2px, -2px)'} onMouseOut={e => e.currentTarget.style.transform = 'translate(0,0)'}>
+                                                    <p style={{ fontSize: '0.82rem', fontWeight: 800, marginBottom: '4px', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{source.title || new URL(source.url).hostname}</p>
+                                                    <p style={{ fontSize: '0.7rem', color: 'var(--color-text-3)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', wordBreak: 'break-all' }}>
+                                                        <ExternalLink size={12} /> {source.url}
+                                                    </p>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text-3)', textAlign: 'center', fontStyle: 'italic' }}>No external sources were analyzed.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Feasibility score as a mini badge under sources just to preserve the score logic */}
+                        {bp?.scores?.scoreRationale && (
+                             <div className="section-card" style={{ padding: '16px', marginTop: '24px', boxShadow: '4px 4px 0px 0px var(--shadow-color)' }}>
+                                 <h4 style={{ fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '8px' }}>🤖 AI Rationale</h4>
+                                 <p style={{ fontSize: '0.8rem', fontWeight: 600, lineHeight: 1.5 }}>{bp.scores.scoreRationale}</p>
+                             </div>
+                        )}
+                    </div>
+
+                </div>
             )}
         </div>
     );

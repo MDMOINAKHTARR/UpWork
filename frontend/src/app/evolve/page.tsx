@@ -15,13 +15,11 @@ const DIRECTION_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var
 const DIRECTION_ICONS = ['🎯', '⚡', '🌐'];
 
 const LOADING_PHASES = [
-    { icon: '🔍', text: 'Running Reddit & Web OSINT simulation...' },
-    { icon: '📊', text: 'Analyzing market gaps and white space...' },
-    { icon: '🏆', text: 'Benchmarking competitors and pricing...' },
-    { icon: '🗂️', text: 'Building 9-block Business Model Canvas...' },
-    { icon: '💰', text: 'Calculating pre-seed capital and pricing tiers...' },
-    { icon: '🗺️', text: 'Generating 12-week execution blueprint...' },
-    { icon: '🚀', text: 'Finalising investor dossier...' },
+    { icon: '🔍', text: 'Scanning live market data with Tavily OSINT...' },
+    { icon: '💀', text: 'Consulting The Reaper for fatal failure points...' },
+    { icon: '⛏️', text: 'Mining Reddit for real customer frustrations...' },
+    { icon: '💰', text: 'Architecting 3-tier SaaS pricing strategy...' },
+    { icon: '🚀', text: 'Discovering the Master Pivot & Winning Edge...' },
 ];
 
 // Phase enum

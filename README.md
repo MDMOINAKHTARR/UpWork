@@ -36,8 +36,8 @@ Upstart, your AI-powered digital incubator, solves this by providing a system th
 
 ## 🌟 Key Features
 
-* **🤖 AI Idea Generator**: Input a domain/interest and get multiple actionable problem-solution ideas powered by LLMs.
-* **📊 Market Opportunity Analyzer**: Get insights on demand and competition levels to validate your idea instantly.
+* **🤖 AI Idea Generator**: Input a domain/interest and get actionable concepts. Validates ideas using a 4-persona "Council of Experts" (The Reaper, The Pain Miner, The Pricing Architect, The Pivot Master).
+* **📊 Market Opportunity Analyzer**: Integrates Tavily AI for real-time market data and live intelligence on competitor positioning to validate your idea instantly.
 * **⚖️ Feasibility Engine**: Evaluates technical difficulty, estimated time, and skill match to provide a realistic feasibility score.
 * **🗺️ Venture Blueprint & MVP Roadmap**: Offers tailored tech stack suggestions, monetization models (SaaS, Freemium, API), and a detailed week-by-week development plan.
 * **💾 Export & Save**: Save your idea blueprints to your account dashboard or export them as PDFs for pitch decks and future reference.
@@ -74,7 +74,7 @@ Upstart, your AI-powered digital incubator, solves this by providing a system th
 * **Framework**: Express.js
 * **Database**: SQLite (`better-sqlite3`) for user data and saved blueprints
 * **Authentication**: JWT & `bcryptjs` for secure user sessions
-* **AI Engine**: Google Generative AI / Groq API for core content generation
+* **AI Engine**: Google Gemini (Council of Experts) / Groq API (Idea Generation) / Tavily API (Live Market Research)
 
 ---
 
@@ -144,7 +144,7 @@ Open your browser and navigate to `http://localhost:3000` to start evolving your
 
 ## 🔮 Future Enhancements (Roadmap)
 
-- [ ] Real-time market data integration (Google Trends, Crunchbase)
+- [x] Real-time market data integration (Tavily AI)
 - [ ] Pitch deck auto-generation algorithms
 - [ ] Investor readiness score
 - [ ] Idea → Prototype visual code generator
